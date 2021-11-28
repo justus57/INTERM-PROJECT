@@ -1,8 +1,5 @@
 ﻿using ISO20022Requests;
 using ParticipantServer.ISO20022Request.PaymentStatusReport;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -15,31 +12,23 @@ using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
-
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml.Serialization;
-using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
 using IPSs.Models.AccountVerification;
-using Nancy.Json;
 using IPSs.Models.ISO20022class;
 using Newtonsoft.Json;
-
+using System.Web.Mvc;
 namespace ParticipantServer.Controllers
-{
-    [ApiController]
+{    
     [Route("v1/credit-transfer")]
-
     public class CreditTransferController 
     {
         static string certPath = "cert/bank0089_transport.cert.pfx";
         // X509Certificate2 cert = new X509Certificate2(File.ReadAllBytes(folderPath + "bank0089_transport.cert.pfx"), ""); //path to certificate
-
         static X509Certificate2 cert = new X509Certificate2(File.ReadAllBytes(certPath), ""); //path to certificatetificate
-
         [HttpPost]
-        [Consumes("application/xml")]
         public string CreditTransfer([FromBody] ISO20022Request.CreditTransfer.Document model)
         {
 
@@ -1281,7 +1270,5 @@ namespace ParticipantServer.Controllers
                     innerEx = es.InnerException.ToString();
             }
         }
-
     }
-
 }

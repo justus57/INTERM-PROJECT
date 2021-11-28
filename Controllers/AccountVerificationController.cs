@@ -1,4 +1,5 @@
-﻿using ISO20022Requests;
+﻿using IPSs.Models.ISO20022class;
+using ISO20022Requests;
 using ISO20022Requests.AccountVerification.Response;
 using Newtonsoft.Json;
 using RestSharp;
@@ -8,21 +9,22 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography.Xml;
 using System.Web;
 using System.Web.Mvc;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
-
 namespace INTERM_PROJECT.Controllers
 {
     public class AccountVerificationController : Controller
     {
         public bool verification { get; private set; }
-
         // Post: AccountVerification
-
-        public ActionResult AccountVefication()
+        static string certPath = "cert/bank0089_transport.cert.pfx";
+        // X509Certificate2 cert = new X509Certificate2(File.ReadAllBytes(folderPath + "bank0089_transport.cert.pfx"), ""); //path to certificate
+        static X509Certificate2 cert = new X509Certificate2(System.IO.File.ReadAllBytes(certPath), ""); //path to certificatetificate
+        public string AccountVefication()
         {
             //log incomingXml
 
@@ -581,6 +583,41 @@ namespace INTERM_PROJECT.Controllers
 
 
 
+        }
+        private void SignXMLFile(XmlDocument doc, object cert)
+        {
+            try
+            {
+
+                SignedXml signedXml = new SignedXml(doc);
+                signedXml.SigningKey = cert.PrivateKey;
+                Reference reference = new Reference();
+                reference.Uri = "";
+                reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
+                signedXml.AddReference(reference);
+
+                KeyInfo keyInfo = new KeyInfo();
+                keyInfo.AddClause(new KeyInfoX509Data(cert));
+                signedXml.KeyInfo = keyInfo;
+                signedXml.ComputeSignature();
+                XmlElement xmlSig = signedXml.GetXml();
+                doc.DocumentElement.AppendChild(doc.ImportNode(xmlSig, true));
+            }
+            catch (Exception es)
+            {
+                Logs.WriteLog(es.Message);
+                string innerEx = "";
+                if (es.InnerException != null)
+                    innerEx = es.InnerException.ToString();
+            }
+        }
+        private string GenerateOrderLineTransactionNumber(string v)
+        {
+            throw new NotImplementedException();
+        }
+        private string GetDLLPath()
+        {
+            throw new NotImplementedException();
         }
     }
 }
